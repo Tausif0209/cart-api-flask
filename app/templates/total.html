@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Total</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="total-box">
+    <h2>💰 Total Price</h2>
+    <p class="total-value" id="total">Loading...</p>
+    <a href="/cart-page" class="back-btn">⬅ Back to Cart</a>
+</div>
+<script>
+async function getTotal() {
+    const res = await fetch("/cart/total");
+    const data = await res.json();
+    document.getElementById("total").innerText = "₹ " + data.total;
+}
+getTotal();
+</script>
+</body>
+</html>

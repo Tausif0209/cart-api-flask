@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="cart-box">
+    <h2 style="text-align:center;">🛒 Cart Items</h2>
+    <div class="edit-box">
+    <h3>✏️ Edit Item</h3>
+    <div class="edit-row">
+        <input id="edit_name" placeholder="Product Name">
+        <input id="edit_price" type="number" placeholder="Price">
+        <input id="edit_qty" type="number" placeholder="Quantity">
+        <button class="update-btn" onclick="updateItem()">Update</button>
+    </div>
+    <input id="edit_id" type="hidden">
+</div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="cart"></tbody>
+    </table>
+    <div class="actions">
+        <a href="/add">➕ Add More</a>
+        <a href="/total-page">💰 View Total</a>
+    </div>
+</div>
+<script>
+async function loadCart() {
+    const res = await fetch("/cart");
+    const data = await res.json();
+    let html = "";
+    if (data.length === 0) {
+        html = "<tr><td colspan='5'>No items in cart</td></tr>";
+    } else {
+        data.forEach(item => {
+            html += `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.product_name}</td>
+                <td>₹ ${item.price}</td>
+                <td>${item.quantity}</td>
+                <td>
+                    <button class="edit-btn" onclick="editItem(${item.id}, '${item.product_name}', ${item.price}, ${item.quantity})">
+    ✏️ Edit
+</button>
+                    <button class="delete-btn" onclick="deleteItem(${item.id})">Delete</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    document.getElementById("cart").innerHTML = html;
+}
+async function deleteItem(id) {
+    await fetch("/cart/remove/" + id, { method: "DELETE" });
+    loadCart();
+}
+function editItem(id, name, price, qty) {
+    document.getElementById("edit_id").value = id;
+    document.getElementById("edit_name").value = name;
+    document.getElementById("edit_price").value = price;
+    document.getElementById("edit_qty").value = qty;
+}
+async function updateItem() {
+    const id = document.getElementById("edit_id").value;
+    if (!id) {
+        alert("Select an item to edit");
+        return;
+    }
+    const data = {
+        product_name: document.getElementById("edit_name").value,
+        price: Number(document.getElementById("edit_price").value),
+        quantity: Number(document.getElementById("edit_qty").value)
+    };
+    const res = await fetch(`/cart/update/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    if (res.ok) {
+        alert("Item updated!");
+        document.getElementById("edit_id").value = "";
+        document.getElementById("edit_name").value = "";
+        document.getElementById("edit_price").value = "";
+        document.getElementById("edit_qty").value = "";
+        loadCart();
+    } else {
+        alert("Error updating item");
+    }
+}
+loadCart();
+</script>
+</body>
+</html>

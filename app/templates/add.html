@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Item</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="form-box">
+    <h2>Add Item</h2>
+    <form id="form">
+        <input id="name" placeholder="Product Name" required>
+        <input id="price" type="number" placeholder="Price" required>
+        <input id="qty" type="number" placeholder="Quantity" required>
+        <button type="submit">Add Item</button>
+    </form>
+    <p id="msg" class="success"></p>
+    <br>
+    <a href="/">⬅ Back Home</a>
+</div>
+<script>
+const baseURL = "http://127.0.0.1:5000";
+document.getElementById("form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const data = {
+        product_name: document.getElementById("name").value,
+        price: Number(document.getElementById("price").value),
+        quantity: Number(document.getElementById("qty").value)
+    };
+    const res = await fetch(baseURL + "/cart/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+    if (res.ok) {
+        document.getElementById("msg").innerText = "✅ Item added successfully!";
+        document.getElementById("form").reset();
+    } else {
+        document.getElementById("msg").innerText = "❌ Error adding item";
+    }
+});
+</script>
+</body>
+</html>
